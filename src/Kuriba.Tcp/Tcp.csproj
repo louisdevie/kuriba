@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;netstandard2.1</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <RootNamespace>Kuriba.Tcp</RootNamespace>
+	  <AssemblyName>Kuriba.Tcp</AssemblyName>
+  </PropertyGroup>
+
+</Project>
