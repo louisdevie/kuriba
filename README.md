@@ -1,6 +1,6 @@
 # Kuriba
 
-A framework for building networked apps, oriented towards multiplayer games.
+A framework for building real-time networked apps.
 
 ## Implemented features
 
