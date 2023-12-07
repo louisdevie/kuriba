@@ -45,12 +45,16 @@ namespace Kuriba.Core.Serialization.Converters
         {
             public override bool CanConvert(Type type, ConverterFactory factory) => type == typeof(int);
 
+            public override object? Read(Type typeToRead, IMessageReader input) => throw new NotImplementedException();
+
             public override void Write(object? value, IMessageWriter output) => throw new NotImplementedException();
         }
 
         private class MockAnyConverter : Converter
         {
             public override bool CanConvert(Type type, ConverterFactory factory) => true;
+
+            public override object? Read(Type typeToRead, IMessageReader input) => throw new NotImplementedException();
 
             public override void Write(object? value, IMessageWriter output) => throw new NotImplementedException();
         }

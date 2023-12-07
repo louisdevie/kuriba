@@ -18,6 +18,13 @@ namespace Kuriba.Core.Serialization.Converters
         /// <param name="output">The writer to use.</param>
         public abstract void Write(object? value, IMessageWriter output);
 
+        /// <summary>
+        /// Reads a value using the given <see cref="IMessageReader"/>.
+        /// </summary>
+        /// <param name="typeToRead">The type of the value to read.s</param>
+        /// <param name="input">The reader to use.</param>
+        public abstract object? Read(Type typeToRead, IMessageReader input);
+
         Converter IConverter.SetupConverter(Type type, ConverterFactory factory) => this;
     }
 }

@@ -21,6 +21,13 @@ namespace Kuriba.Core.Serialization.Converters
 
         public class FloatConverter : Converter<float>
         {
+            protected override float ReadValue(IMessageReader input)
+            {
+                byte[] bytes = input
+                if (!BitConverter.IsLittleEndian) Array.Reverse(bytes);
+                return BitConverter.ToSingle(bytes);
+            }
+
             protected override void WriteValue(float value, IMessageWriter output)
             {
                 byte[] bytes = BitConverter.GetBytes(value);
@@ -31,6 +38,11 @@ namespace Kuriba.Core.Serialization.Converters
 
         public class DoubleConverter : Converter<double>
         {
+            protected override double ReadValue(IMessageReader input)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override void WriteValue(double value, IMessageWriter output)
             {
                 byte[] bytes = BitConverter.GetBytes(value);
@@ -41,6 +53,11 @@ namespace Kuriba.Core.Serialization.Converters
 
         public class DecimalConverter : Converter<decimal>
         {
+            protected override decimal ReadValue(IMessageReader input)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override void WriteValue(decimal value, IMessageWriter output)
             {
                 int[] parts = decimal.GetBits(value);
@@ -58,6 +75,11 @@ namespace Kuriba.Core.Serialization.Converters
 #if NET5_0_OR_GREATER
         public class HalfConverter : Converter<Half>
         {
+            protected override Half ReadValue(IMessageReader input)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override void WriteValue(Half value, IMessageWriter output)
             {
                 byte[] bytes = BitConverter.GetBytes(value);

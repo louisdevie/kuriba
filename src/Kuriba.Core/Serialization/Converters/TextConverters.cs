@@ -18,6 +18,11 @@ namespace Kuriba.Core.Serialization.Converters
         }
         public class CharConverter : Converter<char>
         {
+            protected override char ReadValue(IMessageReader input)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override void WriteValue(char value, IMessageWriter output)
             {
                 char[] charAsArray = new char[1] { value };
@@ -31,6 +36,11 @@ namespace Kuriba.Core.Serialization.Converters
 #if NET5_0_OR_GREATER
         public class RuneConverter : Converter<Rune>
         {
+            protected override Rune ReadValue(IMessageReader input)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override void WriteValue(Rune value, IMessageWriter output)
             {
                 byte[] encoded = new byte[value.Utf8SequenceLength];
@@ -42,6 +52,11 @@ namespace Kuriba.Core.Serialization.Converters
 
         public class StringConverter : Converter<string>
         {
+            protected override string ReadValue(IMessageReader input)
+            {
+                throw new NotImplementedException();
+            }
+
             protected override void WriteValue(string value, IMessageWriter output)
             {
                 Encoder textEncoder = Encoding.UTF8.GetEncoder();

@@ -15,7 +15,8 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new NumberConverters.HalfConverter();
 
-            converter.Write((Half)(1.0/3.0), messageWriter);
+            Half oneThird = (Half)(1.0 / 3.0);
+            converter.Write(oneThird, messageWriter);
 
             Assert.Equal(
                 new byte[3]
@@ -24,6 +25,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(Half), messageReader);
+
+            Assert.IsType<Half>(value);
+            Assert.Equal(oneThird, (Half)value);
         }
 
         [Fact]
@@ -42,6 +51,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(float), messageReader);
+
+            Assert.IsType<float>(value);
+            Assert.Equal(12.34f, (float)value);
         }
 
         [Fact]
@@ -60,6 +77,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(double), messageReader);
+
+            Assert.IsType<double>(value);
+            Assert.Equal(1234.5678, (double)value);
         }
 
         [Fact]
@@ -79,6 +104,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(decimal), messageReader);
+
+            Assert.IsType<decimal>(value);
+            Assert.Equal(-0.123456789m, (decimal)value);
         }
     }
 }

@@ -89,6 +89,11 @@ namespace Kuriba.Core.Serialization.Converters
 
         public override bool CanConvert(Type type, ConverterFactory factory) => type == this.specializedArrayType;
 
+        public override object? Read(Type typeToRead, IMessageReader input)
+        {
+            throw new NotImplementedException();
+        }
+
         public override void Write(object? value, IMessageWriter output)
         {
             if (value == null)

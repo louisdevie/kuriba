@@ -34,5 +34,18 @@ namespace Kuriba.Core.Serialization.Converters
         /// <param name="value">The value to write.</param>
         /// <param name="output">The writer to use.</param>
         protected abstract void WriteValue(T value, IMessageWriter output);
+
+        /// <inheritdoc cref="Converter.Read(Type, IMessageReader)"/>
+        public override object? Read(Type typeToRead, IMessageReader input)
+        {
+            return this.ReadValue(input);
+        }
+
+        /// <summary>
+        /// Read a value using the given <see cref="IMessageReader"/>.
+        /// </summary>
+        /// <param name="input">The reader to use.</param>
+        /// <returns>The value read.</returns>
+        protected abstract T ReadValue(IMessageReader input);
     }
 }

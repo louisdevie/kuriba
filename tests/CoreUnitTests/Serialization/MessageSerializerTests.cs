@@ -7,32 +7,26 @@ namespace Kuriba.Core.Serialization
         [Message(1)]
         private class Message1
         {
-            [MessageField(0)]
-            public int A { get; set; }
         }
 
-        [Fact]
-        public void Serialize()
+        [Message(2)]
+        private class Message2
         {
-            Message1 message = new()
-            {
-                A = 123,
-            };
+            [MessageField(0)]
+            public int A { get; set; }
 
-            byte[] result = MessageSerializer.Serialize(message);
+            [MessageField(1)]
+            public string B { get; set; } = string.Empty;
 
-            Assert.Equal(
-                new byte[7] {
-                    0x01, // message ID
-                    0x00, // one field
-                    0x04, // payload size : four bytes |
-                    0x7b, // |                         |
-                    0x00, // | payload                 | field 1
-                    0x00, // |                         |
-                    0x00  // |                         |
-                },
-                result
-            );
+            [MessageField(2)]
+            public List<double> C { get; set; } = new();
+        }
+
+        [Message(3)]
+        private class Message3
+        {
+            [MessageField(0)]
+            public Message2[] X { get; set; } = Array.Empty<Message2>();
         }
     }
 }

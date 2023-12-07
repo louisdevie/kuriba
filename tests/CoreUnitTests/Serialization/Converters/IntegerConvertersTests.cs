@@ -24,6 +24,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(sbyte), messageReader);
+
+            Assert.IsType<sbyte>(value);
+            Assert.Equal(-47, (sbyte)value);
         }
 
         [Fact]
@@ -42,6 +50,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(byte), messageReader);
+
+            Assert.IsType<byte>(value);
+            Assert.Equal(47, (byte)value);
         }
 
         [Fact]
@@ -60,6 +76,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(short), messageReader);
+
+            Assert.IsType<short>(value);
+            Assert.Equal(-1036, (short)value);
         }
 
         [Fact]
@@ -78,6 +102,14 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(ushort), messageReader);
+
+            Assert.IsType<ushort>(value);
+            Assert.Equal(1036, (ushort)value);
         }
 
         [Fact]
@@ -87,15 +119,23 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new IntegerConverters.Int32Converter();
 
-            converter.Write(-1036, messageWriter);
+            converter.Write(-831467035, messageWriter);
 
             Assert.Equal(
                 new byte[5]
                 {
-                    0x04, 0xf4, 0xfb, 0xff, 0xff,
+                    0x04, 0xe5, 0xd1, 0x70, 0xce,
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(int), messageReader);
+
+            Assert.IsType<int>(value);
+            Assert.Equal(-831467035, value);
         }
 
         [Fact]
@@ -105,15 +145,23 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new IntegerConverters.UInt32Converter();
 
-            converter.Write(1036u, messageWriter);
+            converter.Write(831467035u, messageWriter);
 
             Assert.Equal(
                 new byte[5]
                 {
-                    0x04, 0x0c, 0x04, 0x00, 0x00,
+                    0x04, 0x1b, 0x2e, 0x8f, 0x31,
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(uint), messageReader);
+
+            Assert.IsType<uint>(value);
+            Assert.Equal(831467035u, value);
         }
 
         [Fact]
@@ -123,15 +171,23 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new IntegerConverters.Int64Converter();
 
-            converter.Write(-1036L, messageWriter);
+            converter.Write(-831467035L, messageWriter);
 
             Assert.Equal(
                 new byte[9]
                 {
-                    0x08, 0xf4, 0xfb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                    0x08, 0xe5, 0xd1, 0x70, 0xce, 0xff, 0xff, 0xff, 0xff,
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(long), messageReader);
+
+            Assert.IsType<long>(value);
+            Assert.Equal(-831467035L, value);
         }
 
         [Fact]
@@ -141,15 +197,23 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new IntegerConverters.UInt64Converter();
 
-            converter.Write(1036ul, messageWriter);
+            converter.Write(831467035ul, messageWriter);
 
             Assert.Equal(
                 new byte[9]
                 {
-                    0x08, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x08, 0x1b, 0x2e, 0x8f, 0x31, 0x00, 0x00, 0x00, 0x00,
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(ulong), messageReader);
+
+            Assert.IsType<ulong>(value);
+            Assert.Equal(831467035ul, value);
         }
 
         [Fact]
@@ -159,15 +223,23 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new IntegerConverters.Int128Converter();
 
-            converter.Write((Int128)(-1036), messageWriter);
+            converter.Write((Int128)(-831467035), messageWriter);
 
             Assert.Equal(
                 new byte[17]
                 {
-                    0x10, 0xf4, 0xfb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                    0x10, 0xe5, 0xd1, 0x70, 0xce, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(long), messageReader);
+
+            Assert.IsType<Int128>(value);
+            Assert.Equal(-831467035, (Int128)value);
         }
 
         [Fact]
@@ -177,15 +249,23 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new IntegerConverters.UInt128Converter();
 
-            converter.Write((UInt128)1036, messageWriter);
+            converter.Write((UInt128)831467035, messageWriter);
 
             Assert.Equal(
                 new byte[17]
                 {
-                    0x10, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x10, 0x1b, 0x2e, 0x8f, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            MessageReader messageReader = new(new BinaryReader(output));
+
+            var value = converter.Read(typeof(UInt128), messageReader);
+
+            Assert.IsType<UInt128>(value);
+            Assert.Equal((UInt128)831467035, (UInt128)value);
         }
     }
 }

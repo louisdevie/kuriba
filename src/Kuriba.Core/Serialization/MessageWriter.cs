@@ -34,7 +34,7 @@ namespace Kuriba.Core.Serialization
             MessageStructure structure = MessageFactory.Default.StructureForType(type);
 
             this.WriteHeader(structure.MessageId, structure.LastFieldId);
-
+            
             MessageStructureIterator iter = new MessageStructureIterator(structure);
             while (iter.NextField())
             {
