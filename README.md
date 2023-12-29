@@ -6,12 +6,12 @@ A framework for building real-time networked apps.
 
 ### Serialization
 
-| Data type       |Serialization|Deserialization|
-|:----------------|:-----------:|:-------------:|
-| Numbers         | ✓           | ✗             |
-| Text            | ✓           | ✗             |
-| Enumerations    | ✓           | ✗             |
-| "One of"s       | ✗           | ✗             |
-| Arrays          | ✓           | ✗             |
-| Maps            | ✗           | ✗             |
-| Nested messages | ✗           | ✗             |
+| Data type       |Serialization| Deserialization |
+|:----------------|:-----------:|:---------------:|
+| Numbers         | ✓           |        ✓        |
+| Text            | ✓           |        ✓        |
+| Enumerations    | ✓           |        ✓        |
+| "One of"s       | ✗           |        ✗        |
+| Arrays          | ✓           |        ✓        |
+| Maps            | ✗           |        ✗        |
+| Nested messages | ✗           |        ✗        |
