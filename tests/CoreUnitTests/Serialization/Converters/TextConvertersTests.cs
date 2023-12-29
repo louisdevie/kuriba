@@ -20,6 +20,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             Converter converter = new TextConverters.CharConverter();
 
             //=============== 1-BYTE CHARACTER ================//
@@ -36,8 +37,13 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            object? result = converter.Read(typeof(char), messageReader);
+
+            Assert.IsType<char>(result);
+            Assert.Equal('a', result);
+            
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             //=============== 2-BYTES CHARACTER ===============//
@@ -55,8 +61,13 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            result = converter.Read(typeof(char), messageReader);
+
+            Assert.IsType<char>(result);
+            Assert.Equal('ñ', result);
+            
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             //=============== 3-BYTES CHARACTER ===============//
@@ -74,6 +85,12 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            result = converter.Read(typeof(char), messageReader);
+
+            Assert.IsType<char>(result);
+            Assert.Equal('♫', result);
         }
 
         [Fact]
@@ -81,6 +98,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             Converter converter = new TextConverters.RuneConverter();
 
             //=============== 1-BYTE CHARACTER ================//
@@ -97,8 +115,13 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            object? result = converter.Read(typeof(Rune), messageReader);
+
+            Assert.IsType<Rune>(result);
+            Assert.Equal(new Rune('a'), result);
+
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             //=============== 2-BYTES CHARACTER ===============//
@@ -116,8 +139,13 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            result = converter.Read(typeof(Rune), messageReader);
+
+            Assert.IsType<Rune>(result);
+            Assert.Equal(new Rune('ñ'), result);
+
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             //=============== 3-BYTES CHARACTER ===============//
@@ -136,8 +164,13 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            result = converter.Read(typeof(Rune), messageReader);
+
+            Assert.IsType<Rune>(result);
+            Assert.Equal(new Rune('♫'), result);
+
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             //=============== 4-BYTES CHARACTER ===============//
@@ -156,6 +189,12 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            result = converter.Read(typeof(Rune), messageReader);
+
+            Assert.IsType<Rune>(result);
+            Assert.Equal(new Rune(127828), result);
         }
 
         [Fact]
@@ -163,6 +202,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             Converter converter = new TextConverters.StringConverter();
 
             //================= EMPTY STRING ==================//
@@ -178,8 +218,13 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            object? result = converter.Read(typeof(string), messageReader);
+
+            Assert.IsType<string>(result);
+            Assert.Equal("", result);
+
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             //================= SHORT STRING ==================//
@@ -200,70 +245,83 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            result = converter.Read(typeof(string), messageReader);
+
+            Assert.IsType<string>(result);
+            Assert.Equal("Hello, World!", result);
+
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             //=============== VERY LONG STRING ================//
 
             // entire novel
-            string text = @"
-“Shokuhou, do it now!”
-Mikoto interrupted with a command to the other girl.
-While still clinging to Mikoto from behind, Shokuhou Misaki pulled a TV remote
-from the small bag she wore over her shoulder and gently pressed it against the
-back of(daydreaming) Shirai Kuroko’s head.
-She pressed a silent button and the chestnut twintails girl’s head wobbled slightly.
-Shokuhou Misaki’s Mental Out was the strongest psychological power.
-But it had such a broad range of applications that it was difficult to control
-even for her, so she used different remotes as a form of self - suggestion to
-create categories for her power.
-And of course…
-“Hey.”
-The teachers knew what her power could do, so tension ran through the one monitoring
-them once the blonde girl reached for her bag. She reflexively called out in a strict voice.
-“Shirai, where did you find that remote ? Was the actual digital recorder not
-thrown out along with it! ?”
-“What ?”
-She was focused on the remote, but not in the right way.
-However, the teacher did not notice the shift in her own thoughts.
-“What remote ? This is a kamaboko board.”
-But the item the confused twintail girl waved in her defense was an empty chocolate bar box.
-“No, you definitely had a remote.It has to be around there somewhere!”
-“Again, this is a kamaboko board.”
-“It is a remote!!”
-The two of them got unnaturally particular about something meaningless.
-Meanwhile, the honey - blonde girl with the real remote in hand was laughing. She
-was of course within both arguers’ field of vision, but neither one mentioned her
-at all. As usual, that girl had a knack for mischief.
-The minor argument between student and teacher created a disturbance in their
-ranks as the sheltered girls gathered around to watch.
-“What about the smart glasses ?” asked Shokuhou with a wink.
-“Already dealt with.”
-Even if they were running off, they could not just throw out the tongs and
-half-filled trash bags they were using, so they left them by the main road where
-the robots would find them.
-Now came the tricky part.
-Mikoto gave her casual response and then slipped away from the crowd into an alley
-between multi - tenant buildings.
-She removed the GPS tracker locked to her right ankle and did the same for
-Shokuhou who had come with her and she tossed them into the gap between beer
-cases piled up nearby.Then she wrapped her arms around the blonde girl’s skinny
-waist and leaped straight up.She used her power over magnetism to use the
-reinforced concrete wall as a foothold and ran all the way up to the 5 - story
-building’s rooftop.It was a lot like using the giant lifting magnet that cranes
-used to move abandoned cars in a scrap yard.
-This was an example of Academy City’s esper powers.";
+            const string TEXT = """
+                                “Shokuhou, do it now!”
+                                Mikoto interrupted with a command to the other girl.
+                                While still clinging to Mikoto from behind, Shokuhou Misaki pulled a TV remote
+                                from the small bag she wore over her shoulder and gently pressed it against the
+                                back of(daydreaming) Shirai Kuroko’s head.
+                                She pressed a silent button and the chestnut twintails girl’s head wobbled slightly.
+                                Shokuhou Misaki’s Mental Out was the strongest psychological power.
+                                But it had such a broad range of applications that it was difficult to control
+                                even for her, so she used different remotes as a form of self - suggestion to
+                                create categories for her power.
+                                And of course…
+                                “Hey.”
+                                The teachers knew what her power could do, so tension ran through the one monitoring
+                                them once the blonde girl reached for her bag. She reflexively called out in a strict voice.
+                                “Shirai, where did you find that remote ? Was the actual digital recorder not
+                                thrown out along with it! ?”
+                                “What ?”
+                                She was focused on the remote, but not in the right way.
+                                However, the teacher did not notice the shift in her own thoughts.
+                                “What remote ? This is a kamaboko board.”
+                                But the item the confused twintail girl waved in her defense was an empty chocolate bar box.
+                                “No, you definitely had a remote.It has to be around there somewhere!”
+                                “Again, this is a kamaboko board.”
+                                “It is a remote!!”
+                                The two of them got unnaturally particular about something meaningless.
+                                Meanwhile, the honey - blonde girl with the real remote in hand was laughing. She
+                                was of course within both arguers’ field of vision, but neither one mentioned her
+                                at all. As usual, that girl had a knack for mischief.
+                                The minor argument between student and teacher created a disturbance in their
+                                ranks as the sheltered girls gathered around to watch.
+                                “What about the smart glasses ?” asked Shokuhou with a wink.
+                                “Already dealt with.”
+                                Even if they were running off, they could not just throw out the tongs and
+                                half-filled trash bags they were using, so they left them by the main road where
+                                the robots would find them.
+                                Now came the tricky part.
+                                Mikoto gave her casual response and then slipped away from the crowd into an alley
+                                between multi - tenant buildings.
+                                She removed the GPS tracker locked to her right ankle and did the same for
+                                Shokuhou who had come with her and she tossed them into the gap between beer
+                                cases piled up nearby.Then she wrapped her arms around the blonde girl’s skinny
+                                waist and leaped straight up.She used her power over magnetism to use the
+                                reinforced concrete wall as a foothold and ran all the way up to the 5 - story
+                                building’s rooftop.It was a lot like using the giant lifting magnet that cranes
+                                used to move abandoned cars in a scrap yard.
+                                This was an example of Academy City’s esper powers.
+                                """;
 
-            converter.Write(text, messageWriter);
+            converter.Write(TEXT, messageWriter);
 
-            byte[] expectedResult = new byte[2821];
-            expectedResult[0] = 0x1f; // variable length               |
-            expectedResult[1] = 0b1001_0110; // | actual size (23460)  | header
-            expectedResult[2] = 0b0000_0010; // | split over two bytes |
-            Array.Copy(Encoding.UTF8.GetBytes(text), 0, expectedResult, 3, 2818); // then the data
+            int encodedSize = Encoding.UTF8.GetEncoder().GetByteCount(TEXT, true);
+            byte[] expectedResult = new byte[encodedSize + 3];
+            expectedResult[0] = 0x1f; // variable length                                           |
+            expectedResult[1] = (byte)((encodedSize >> 7) & 0x7f | 0x80); // | actual size         | header
+            expectedResult[2] = (byte)(encodedSize & 0x7f); //              | split over two bytes |
+            Array.Copy(Encoding.UTF8.GetBytes(TEXT), 0, expectedResult, 3, encodedSize); // then the data
 
             Assert.Equal(expectedResult, output.ToArray());
+
+            output.Position = 0;
+            result = converter.Read(typeof(string), messageReader);
+
+            Assert.IsType<string>(result);
+            Assert.Equal(TEXT, result);
         }
     }
 }

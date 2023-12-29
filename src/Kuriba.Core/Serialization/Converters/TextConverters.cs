@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Buffers;
 using System.Text;
-using System.Threading.Tasks;
+using Kuriba.Core.Exceptions;
 
 namespace Kuriba.Core.Serialization.Converters
 {
@@ -20,7 +19,11 @@ namespace Kuriba.Core.Serialization.Converters
         {
             protected override char ReadValue(IMessageReader input)
             {
-                throw new NotImplementedException();
+                byte[] encoded = input.ReadVarField();
+                Decoder textDecoder = Encoding.UTF8.GetDecoder();
+                char[] charAsArray = new char[textDecoder.GetCharCount(encoded, false)];
+                textDecoder.GetChars(encoded, charAsArray, false);
+                return charAsArray.Length == 1 ? charAsArray[0] : throw new UnreadableException($"Expected to read one and only one char, got {charAsArray.Length}");
             }
 
             protected override void WriteValue(char value, IMessageWriter output)
@@ -38,7 +41,10 @@ namespace Kuriba.Core.Serialization.Converters
         {
             protected override Rune ReadValue(IMessageReader input)
             {
-                throw new NotImplementedException();
+                byte[] encoded = input.ReadVarField();
+                var status = Rune.DecodeFromUtf8(encoded, out Rune result, out _);
+                if (status != OperationStatus.Done) throw new UnreadableException("Cannot read full Rune.");
+                return result;
             }
 
             protected override void WriteValue(Rune value, IMessageWriter output)
@@ -54,14 +60,13 @@ namespace Kuriba.Core.Serialization.Converters
         {
             protected override string ReadValue(IMessageReader input)
             {
-                throw new NotImplementedException();
+                byte[] encoded = input.ReadVarField();
+                return Encoding.UTF8.GetString(encoded);
             }
 
             protected override void WriteValue(string value, IMessageWriter output)
             {
-                Encoder textEncoder = Encoding.UTF8.GetEncoder();
-                byte[] encoded = new byte[textEncoder.GetByteCount(value, false)];
-                textEncoder.GetBytes(value, encoded, false);
+                byte[] encoded = Encoding.UTF8.GetBytes(value);
                 output.WriteVarField(encoded);
             }
         }

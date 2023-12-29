@@ -15,7 +15,7 @@ namespace Kuriba.Core.Serialization.Converters
             MessageWriter messageWriter = new(new BinaryWriter(output));
             Converter converter = new NumberConverters.HalfConverter();
 
-            Half oneThird = (Half)(1.0 / 3.0);
+            var oneThird = (Half)(1.0 / 3.0);
             converter.Write(oneThird, messageWriter);
 
             Assert.Equal(
@@ -29,7 +29,7 @@ namespace Kuriba.Core.Serialization.Converters
             output.Position = 0;
             MessageReader messageReader = new(new BinaryReader(output));
 
-            var value = converter.Read(typeof(Half), messageReader);
+            object? value = converter.Read(typeof(Half), messageReader);
 
             Assert.IsType<Half>(value);
             Assert.Equal(oneThird, (Half)value);
@@ -55,7 +55,7 @@ namespace Kuriba.Core.Serialization.Converters
             output.Position = 0;
             MessageReader messageReader = new(new BinaryReader(output));
 
-            var value = converter.Read(typeof(float), messageReader);
+            object? value = converter.Read(typeof(float), messageReader);
 
             Assert.IsType<float>(value);
             Assert.Equal(12.34f, (float)value);
@@ -81,7 +81,7 @@ namespace Kuriba.Core.Serialization.Converters
             output.Position = 0;
             MessageReader messageReader = new(new BinaryReader(output));
 
-            var value = converter.Read(typeof(double), messageReader);
+            object? value = converter.Read(typeof(double), messageReader);
 
             Assert.IsType<double>(value);
             Assert.Equal(1234.5678, (double)value);
@@ -108,7 +108,7 @@ namespace Kuriba.Core.Serialization.Converters
             output.Position = 0;
             MessageReader messageReader = new(new BinaryReader(output));
 
-            var value = converter.Read(typeof(decimal), messageReader);
+            object? value = converter.Read(typeof(decimal), messageReader);
 
             Assert.IsType<decimal>(value);
             Assert.Equal(-0.123456789m, (decimal)value);

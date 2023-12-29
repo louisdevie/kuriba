@@ -62,6 +62,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             ConverterFactory factory = new ConverterFactory();
             factory.AddConverter(new IntegerConverters.Int32Converter());
             GenericConverter genericConverter = new EnumConverter();
@@ -77,8 +78,13 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            object? value = int32EnumConverter.Read(typeof(Int32Enum), messageReader);
+            
+            Assert.IsType<Int32Enum>(value);
+            Assert.Equal(Int32Enum.B, value);
+
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             int32EnumConverter.Write(OtherInt32Enum.Z, messageWriter);
@@ -90,6 +96,12 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            value = int32EnumConverter.Read(typeof(OtherInt32Enum), messageReader);
+            
+            Assert.IsType<OtherInt32Enum>(value);
+            Assert.Equal(OtherInt32Enum.Z, value);
         }
 
         [Fact]
@@ -97,12 +109,13 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             ConverterFactory factory = new ConverterFactory();
             factory.AddConverter(new IntegerConverters.ByteConverter());
             GenericConverter genericConverter = new EnumConverter();
-            Converter int32EnumConverter = genericConverter.SpecializeFor(typeof(ByteEnum), factory);
+            Converter byteEnumConverter = genericConverter.SpecializeFor(typeof(ByteEnum), factory);
 
-            int32EnumConverter.Write(ByteEnum.A, messageWriter);
+            byteEnumConverter.Write(ByteEnum.A, messageWriter);
 
             Assert.Equal(
                 new byte[2]
@@ -111,6 +124,12 @@ namespace Kuriba.Core.Serialization.Converters
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            object? value = byteEnumConverter.Read(typeof(ByteEnum), messageReader);
+            
+            Assert.IsType<ByteEnum>(value);
+            Assert.Equal(ByteEnum.A, value);
         }
     }
 }

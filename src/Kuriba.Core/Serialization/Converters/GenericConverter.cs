@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kuriba.Core.Serialization.Converters
 {
@@ -15,7 +11,7 @@ namespace Kuriba.Core.Serialization.Converters
         public abstract bool CanConvert(Type type, ConverterFactory factory);
 
         /// <summary>
-        /// Gets the approprite instance of the converter to handle a specific type.
+        /// Gets the appropriate instance of the converter to handle a specific type.
         /// </summary>
         /// <param name="type">The type of values to handle.</param>
         /// <param name="factory">The factory that manages this converter. Is other converters are needed, they should come from this factory.</param>

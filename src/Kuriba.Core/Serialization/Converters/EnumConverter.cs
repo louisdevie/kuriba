@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kuriba.Core.Serialization.Converters
 {
@@ -22,8 +18,8 @@ namespace Kuriba.Core.Serialization.Converters
 
     internal class SpecializedEnumConverter : Converter
     {
-        private Converter intConverter;
-        private Type intType;
+        private readonly Converter intConverter;
+        private readonly Type intType;
 
         public SpecializedEnumConverter(Converter intConverter, Type intType)
         {
@@ -38,7 +34,7 @@ namespace Kuriba.Core.Serialization.Converters
 
         public override object? Read(Type typeToRead, IMessageReader input)
         {
-            throw new NotImplementedException();
+            return Enum.ToObject(typeToRead, this.intConverter.Read(this.intType, input)!);
         }
 
         public override void Write(object? value, IMessageWriter output)

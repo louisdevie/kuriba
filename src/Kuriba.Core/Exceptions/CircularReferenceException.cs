@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Kuriba.Core.Exceptions
+﻿namespace Kuriba.Core.Exceptions
 {
     /// <summary>
     /// Exception thrown when a circular reference is found in an object that is being serialized.

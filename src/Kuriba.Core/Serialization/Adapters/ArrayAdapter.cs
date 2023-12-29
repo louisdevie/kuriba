@@ -1,16 +1,14 @@
-﻿using Kuriba.Core.Serialization.Converters;
-using System;
-using System.Collections;
+﻿using System;
 
 namespace Kuriba.Core.Serialization.Adapters
 {
     internal class ArrayAdapter : IArray
     {
-        public class Enumerator : IArrayEnumerator
+        private class Enumerator : IArrayEnumerator
         {
-            private ArrayAdapter arrayAdapter;
-            private int[] indices;
-            private int depth;
+            private readonly ArrayAdapter arrayAdapter;
+            private readonly int[] indices;
+            private readonly int depth;
             private int upperBound;
             private object? current;
 
@@ -43,26 +41,14 @@ namespace Kuriba.Core.Serialization.Adapters
 
             public bool Next()
             {
-                if (++this.indices[this.depth] <= this.upperBound)
-                {
-                    if (this.Dimensions == 1)
-                    {
-                        this.current = this.Array.GetValue(this.indices);
-                    }
-                    else
-                    {
-                        this.current = new Enumerator(this);
-                    }
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                if (++this.indices[this.depth] > this.upperBound) return false;
+                
+                this.current = this.Dimensions == 1 ? this.Array.GetValue(this.indices) : new Enumerator(this);
+                return true;
             }
         }
 
-        Array array;
+        readonly Array array;
 
         public ArrayAdapter(Array array)
         {
@@ -75,5 +61,73 @@ namespace Kuriba.Core.Serialization.Adapters
     internal class ArrayAdapterPrototype : IArrayAdapterPrototype
     {
         public IArray Wrap(object arrayLike) => new ArrayAdapter((Array)arrayLike);
+        public IArrayBuilder New(Type arrayType) => new ArrayBuilder(arrayType);
+    }
+
+    internal class ArrayBuilder : IArrayBuilder
+    {
+        private readonly Type arrayType;
+        private Array? array;
+        private readonly int[] dimensions;
+        private readonly int[] indices;
+        private int depth;
+
+        public ArrayBuilder(Type arrayType)
+        {
+            this.arrayType = arrayType;
+            this.array = null;
+            this.depth = -1;
+
+            int rank = this.arrayType.GetArrayRank();
+            this.dimensions = new int[rank];
+            this.indices = new int[rank];
+        }
+
+        public object Finish()
+        {
+            return this.array ?? throw new InvalidOperationException("The array hasn't been built yet.");
+        }
+        
+        public int Push(int size)
+        {
+            this.depth++;
+
+            if (this.array == null)
+            {
+                this.dimensions[this.depth] = size;
+                if (this.depth == this.dimensions.Length - 1)
+                {
+                    this.array = MakeArray();
+                }
+            }
+
+            this.indices[this.depth] = 0;
+
+            return this.dimensions.Length - this.depth;
+        }
+
+        private Array MakeArray()
+        {
+            var constructorSignature = new Type[this.dimensions.Length];
+            Array.Fill(constructorSignature, typeof(int));
+
+            return (Array)this.arrayType
+                .GetConstructor(constructorSignature)!
+                .Invoke(Array.ConvertAll(this.dimensions, d => (object)d));
+        }
+
+        public void AddValue(object? value)
+        {
+            this.array!.SetValue(value, this.indices);
+            this.indices[this.depth]++;
+        }
+
+        public void Pop()
+        {
+            if (--this.depth >= 0)
+            {
+                this.indices[this.depth]++;
+            }
+        }
     }
 }

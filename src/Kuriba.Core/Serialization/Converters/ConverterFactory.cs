@@ -1,10 +1,6 @@
 ﻿using Kuriba.Core.Exceptions;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kuriba.Core.Serialization.Converters
 {
@@ -28,7 +24,10 @@ namespace Kuriba.Core.Serialization.Converters
                     IntegerConverters.AddAll(defaultInstance);
                     NumberConverters.AddAll(defaultInstance);
                     TextConverters.AddAll(defaultInstance);
+                    defaultInstance.AddConverter(new EnumConverter());
+                    defaultInstance.AddConverter(new ArrayConverter());
                 }
+
                 return defaultInstance;
             }
         }
@@ -77,14 +76,12 @@ namespace Kuriba.Core.Serialization.Converters
         {
             lock (this.converters)
             {
-                if (this.converters.FindLast(c => c.CanConvert(fieldType, this)) is IConverter converter)
-                {
-                    return converter.SetupConverter(fieldType, this);
-                }
-                else
-                {
+                var converter = this.converters.FindLast(c => c.CanConvert(fieldType, this));
+
+                if (converter == null)
                     throw new UnwriteableTypeException($"No converter found to serialize {fieldType.FullName}");
-                }
+
+                return converter.SetupConverter(fieldType, this);
             }
         }
 

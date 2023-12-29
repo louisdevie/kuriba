@@ -1,12 +1,9 @@
 ﻿using Kuriba.Core.Exceptions;
 using Kuriba.Core.Messages;
-using Kuriba.Core.Serialization.Converters;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Kuriba.Core.Serialization
 {
@@ -15,6 +12,7 @@ namespace Kuriba.Core.Serialization
         private readonly Type messageType;
         private readonly byte messageId;
         private readonly SortedList<byte, MessageField> fields;
+        private readonly ConstructorInfo constructor;
 
         public Type MessageType => this.messageType;
 
@@ -26,14 +24,14 @@ namespace Kuriba.Core.Serialization
         {
             get
             {
+                byte? id = null;
+
                 if (this.fields.Count > 0)
                 {
-                    return this.fields.Last().Key;
+                    id = this.fields.Last().Key;
                 }
-                else
-                {
-                    return null;
-                }
+
+                return id;
             }
         }
 
@@ -41,19 +39,36 @@ namespace Kuriba.Core.Serialization
         {
             this.messageType = messageType;
 
-            MessageAttribute messageMetadata = messageType.GetCustomAttribute<MessageAttribute>()
-                ?? throw new InvalidMessageTypeException($"Type {messageType.FullName} has no Message attribute.");
+            MessageAttribute messageMetadata =
+                this.messageType.GetCustomAttribute<MessageAttribute>()
+                ?? throw new InvalidMessageTypeException(
+                    $"Type {this.messageType.FullName} has no Message attribute.");
+
+            this.constructor =
+                this.messageType.GetConstructor(Array.Empty<Type>())
+                ?? throw new InvalidMessageTypeException(
+                    $"Type {this.messageType.FullName} has no default constructor.");
 
             this.messageId = messageMetadata.Id;
             this.fields = new SortedList<byte, MessageField>();
 
-            foreach (var property in messageType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var property in this.messageType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (property.GetCustomAttribute<MessageFieldAttribute>() is MessageFieldAttribute propertyMetadata)
                 {
                     this.fields.Add(propertyMetadata.Id, new MessageField(property));
                 }
             }
+        }
+
+        public MessageField GetField(byte fieldId)
+        {
+            return this.fields[fieldId];
+        }
+
+        public object CreateInstance()
+        {
+            return this.constructor.Invoke(null);
         }
     }
 }

@@ -1,20 +1,14 @@
-﻿using Kuriba.Core.Serialization.Converters;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kuriba.Core.Serialization.Adapters
 {
     internal class ListAdapter<T> : IArray
     {
-        public class Enumerator : IArrayEnumerator
+        private class Enumerator : IArrayEnumerator
         {
-            private ListAdapter<T> adapter;
-            private IEnumerator<T> underlying;
+            private readonly ListAdapter<T> adapter;
+            private readonly IEnumerator<T> underlying;
 
             public Enumerator(ListAdapter<T> adapter)
             {
@@ -35,7 +29,7 @@ namespace Kuriba.Core.Serialization.Adapters
             public bool Next() => this.underlying.MoveNext();
         }
 
-        private List<T> list;
+        private readonly List<T> list;
 
         public ListAdapter(List<T> list)
         {
@@ -48,5 +42,29 @@ namespace Kuriba.Core.Serialization.Adapters
     internal class ListAdapterPrototype<T> : IArrayAdapterPrototype
     {
         public IArray Wrap(object arrayLike) => new ListAdapter<T>((List<T>)arrayLike);
+
+        public IArrayBuilder New(Type arrayType) => new ListBuilder<T>();
+    }
+
+    internal class ListBuilder<T> : IArrayBuilder
+    {
+        private List<T>? list;
+
+        public object Finish() => this.list ?? throw new InvalidOperationException("The list has not been created yet.");
+
+        public int Push(int size)
+        {
+            if (this.list != null) throw new InvalidOperationException("A list can only have one dimension.");
+            this.list = new List<T>(size);
+            return 1;
+        }
+
+        public void AddValue(object? value)
+        {
+            if (this.list == null) throw new InvalidOperationException("The list has not been created yet.");
+            this.list.Add((T)value!);
+        }
+
+        public void Pop() { }
     }
 }

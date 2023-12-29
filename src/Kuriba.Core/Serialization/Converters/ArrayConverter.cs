@@ -10,45 +10,56 @@ namespace Kuriba.Core.Serialization.Converters
     {
         public static bool IsConstructedListType(Type type, [NotNullWhen(true)] out Type? containedType)
         {
+            bool result;
+            
             if (type.IsConstructedGenericType
                 && type.GetGenericTypeDefinition() == typeof(List<>))
             {
                 containedType = type.GenericTypeArguments[0];
-                return true;
+                result = true;
             }
             else
             {
                 containedType = null;
-                return false;
+                result = false;
             }
+
+            return result;
         }
 
         public static bool IsArrayType(Type type, [NotNullWhen(true)] out Type? containedType)
         {
+            bool result;
+            
             if (type.IsArray)
             {
                 containedType = type.GetElementType()!;
-                return true;
+                result = true;
             }
             else
             {
                 containedType = null;
-                return false;
+                result = false;
             }
+
+            return result;
         }
 
         public override bool CanConvert(Type type, ConverterFactory factory)
         {
-            Type? containedType;
-            if (IsArrayType(type, out containedType)
+            bool result;
+            
+            if (IsArrayType(type, out var containedType)
                 || IsConstructedListType(type, out containedType))
             {
-                return factory.HasConverterFor(containedType);
+                result = factory.HasConverterFor(containedType);
             }
             else
             {
-                return false;
+                result = false;
             }
+
+            return result;
         }
 
         public override Converter SpecializeFor(Type type, ConverterFactory factory)
@@ -59,23 +70,22 @@ namespace Kuriba.Core.Serialization.Converters
 
     internal class SpecializedArrayConverter : Converter
     {
-        private Converter containedTypeConverter;
-        private Type specializedArrayType;
-        private IArrayAdapterPrototype arrayAdapterPrototype;
+        private readonly Converter containedTypeConverter;
+        private readonly Type specializedArrayType;
+        private readonly IArrayAdapterPrototype arrayAdapterPrototype;
+        private readonly Type containedType;
 
         public SpecializedArrayConverter(Type type, ConverterFactory factory)
         {
-            Type? containedType;
-
             // create the appropriate prototype
-            if (ArrayConverter.IsArrayType(type, out containedType))
+            if (ArrayConverter.IsArrayType(type, out var containedTypeFound))
             {
                 this.arrayAdapterPrototype = arrayAdapterPrototype = new ArrayAdapterPrototype();
             }
-            else if (ArrayConverter.IsConstructedListType(type, out containedType))
+            else if (ArrayConverter.IsConstructedListType(type, out containedTypeFound))
             {
                 this.arrayAdapterPrototype = (IArrayAdapterPrototype)typeof(ListAdapterPrototype<>)
-                                           .MakeGenericType(containedType)
+                                           .MakeGenericType(containedTypeFound)
                                            .GetConstructor(Array.Empty<Type>())!.Invoke(null);
             }
             else
@@ -84,27 +94,53 @@ namespace Kuriba.Core.Serialization.Converters
             }
 
             this.specializedArrayType = type;
-            this.containedTypeConverter = factory.GetConverterFor(containedType);
+            this.containedType = containedTypeFound;
+            this.containedTypeConverter = factory.GetConverterFor(this.containedType);
         }
 
         public override bool CanConvert(Type type, ConverterFactory factory) => type == this.specializedArrayType;
 
         public override object? Read(Type typeToRead, IMessageReader input)
         {
-            throw new NotImplementedException();
+            IArrayBuilder arrayBuilder = this.arrayAdapterPrototype.New(typeToRead);
+            this.ReadRecursive(arrayBuilder, input);
+
+            return arrayBuilder.Finish();
+        }
+        
+        private void ReadRecursive(IArrayBuilder builder, IMessageReader input)
+        {
+            // read header
+            ushort size = input.ReadArrayHeader();
+            int dimensions = builder.Push(size);
+
+            // read values
+            for (int i = 0; i < size; i++)
+            {
+                if (dimensions == 1)
+                {
+                    // down to a 1-dimensional array
+                    builder.AddValue(this.containedTypeConverter.Read(this.containedType, input));
+                }
+                else
+                {
+                    // still dealing with a multi-dimensional array
+                    this.ReadRecursive(builder, input);
+                }
+            }
+
+            builder.Pop();
         }
 
         public override void Write(object? value, IMessageWriter output)
         {
             if (value == null)
             {
-                output.WriteEmptyField();
+                throw new NullReferenceException("The array to serialize was null.");
             }
-            else
-            {
-                IArray array = this.arrayAdapterPrototype.Wrap(value);
-                this.WriteRecursive(array.GetEnumerator(), output);
-            }
+
+            IArray array = this.arrayAdapterPrototype.Wrap(value);
+            this.WriteRecursive(array.GetEnumerator(), output);
         }
 
         private void WriteRecursive(IArrayEnumerator enumerator, IMessageWriter output)
@@ -120,14 +156,7 @@ namespace Kuriba.Core.Serialization.Converters
                 if (enumerator.Dimensions == 1)
                 {
                     // down to a 1-dimensional array
-                    if (enumerator.Current == null)
-                    {
-                        output.WriteEmptyField();
-                    }
-                    else
-                    {
-                        this.containedTypeConverter.Write(enumerator.Current, output);
-                    }
+                    this.containedTypeConverter.Write(enumerator.Current, output);
                 }
                 else
                 {

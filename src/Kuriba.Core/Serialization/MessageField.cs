@@ -5,8 +5,8 @@ namespace Kuriba.Core.Serialization
 {
     internal class MessageField
     {
-        private PropertyInfo propertyInfo;
-        private Converter converter;
+        private readonly PropertyInfo propertyInfo;
+        private readonly Converter converter;
 
         public MessageField(PropertyInfo propertyInfo)
         {
@@ -14,13 +14,23 @@ namespace Kuriba.Core.Serialization
             this.converter = ConverterFactory.Default.GetConverterFor(this.propertyInfo.PropertyType);
         }
 
-        public void WriteValueFromMessage(object message, IMessageWriter output)
+        public void WriteValueFromMessage(object message, IMessageWriter output, IReferenceTracker tracker)
         {
-            this.converter.Write(
-                this.propertyInfo.GetValue(message),
-                output
-            );
+            object? value = this.propertyInfo.GetValue(message);
+
+            if (this.propertyInfo.PropertyType.IsByRef)
+            {
+                tracker.TrackObject(value);
+            }
+
+            this.converter.Write(value, output);
+        }
+
+        public void ReadValueIntoMessage(object message, IMessageReader input)
+        {
+            object? value = this.converter.Read(this.propertyInfo.PropertyType, input);
+            
+            this.propertyInfo.SetValue(message, value);
         }
     }
-
 }

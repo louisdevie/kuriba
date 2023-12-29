@@ -1,13 +1,8 @@
 ﻿using Kuriba.Core.Exceptions;
 using Kuriba.Core.Messages;
-using Kuriba.Core.Serialization.Converters;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Kuriba.Core.Serialization
 {
@@ -30,14 +25,11 @@ namespace Kuriba.Core.Serialization
                 return defaultInstance;
             }
 
-            set
-            {
-                defaultInstance = value;
-            }
+            set => defaultInstance = value;
         }
 
-        private ConcurrentDictionary<Type, MessageStructure> structuresByType;
-        private ConcurrentDictionary<byte, MessageStructure> structuresById;
+        private readonly ConcurrentDictionary<Type, MessageStructure> structuresByType;
+        private readonly ConcurrentDictionary<byte, MessageStructure> structuresById;
 
         /// <summary>
         /// Creates a new factory without any message types registered.

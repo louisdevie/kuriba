@@ -9,7 +9,9 @@ namespace Kuriba.Core.Serialization.Converters
 {
     public class ArrayConverterTests
     {
-        private class Anything { }
+        private class Anything
+        {
+        }
 
         [Fact]
         public void CanConvert()
@@ -91,6 +93,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             ConverterFactory factory = new ConverterFactory();
             GenericConverter genericArrayConverter = new ArrayConverter();
             factory.AddConverter(genericArrayConverter);
@@ -108,17 +111,28 @@ namespace Kuriba.Core.Serialization.Converters
                     0x04, 67, 0, 0, 0, // third value  |
                 };
 
-            arrayConverter.Write(new int[] { 23, 45, 67 }, messageWriter);
+            arrayConverter.Write(new[] { 23, 45, 67 }, messageWriter);
 
             Assert.Equal(expectedResult, output.ToArray());
 
-            // reset memory stream without reallocating
             output.Position = 0;
+            object? result = arrayConverter.Read(typeof(int[]), messageReader);
+
+            Assert.IsType<int[]>(result);
+            Assert.Equal(new[] { 23, 45, 67 }, result);
+
+            // reset memory stream without reallocating
             output.SetLength(0);
 
             listConverter.Write(new List<int> { 23, 45, 67 }, messageWriter);
 
             Assert.Equal(expectedResult, output.ToArray());
+
+            output.Position = 0;
+            result = listConverter.Read(typeof(List<int>), messageReader);
+
+            Assert.IsType<List<int>>(result);
+            Assert.Equal(new List<int> { 23, 45, 67 }, result);
         }
 
         [Fact]
@@ -126,6 +140,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             ConverterFactory factory = new ConverterFactory();
             GenericConverter genericArrayConverter = new ArrayConverter();
             factory.AddConverter(genericArrayConverter);
@@ -142,7 +157,13 @@ namespace Kuriba.Core.Serialization.Converters
                     0x1f, 0x05, 0x57, 0x6F, 0x72, 0x6C, 0x64, // second value |
                 };
 
-            arrayConverter.Write(new string[] { "Hello", "World" }, messageWriter);
+            arrayConverter.Write(new[] { "Hello", "World" }, messageWriter);
+
+            output.Position = 0;
+            object? result = arrayConverter.Read(typeof(string[]), messageReader);
+
+            Assert.IsType<string[]>(result);
+            Assert.Equal(new[] { "Hello", "World" }, result);
 
             Assert.Equal(expectedResult, output.ToArray());
 
@@ -153,6 +174,14 @@ namespace Kuriba.Core.Serialization.Converters
             listConverter.Write(new List<string> { "Hello", "World" }, messageWriter);
 
             Assert.Equal(expectedResult, output.ToArray());
+
+            output.Position = 0;
+            result = listConverter.Read(typeof(List<string>), messageReader);
+
+            Assert.IsType<List<string>>(result);
+            Assert.Equal(new List<string> { "Hello", "World" }, result);
+
+            Assert.Equal(expectedResult, output.ToArray());
         }
 
         [Fact]
@@ -160,6 +189,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             ConverterFactory factory = new ConverterFactory();
             GenericConverter genericArrayConverter = new ArrayConverter();
             factory.AddConverter(genericArrayConverter);
@@ -187,33 +217,61 @@ namespace Kuriba.Core.Serialization.Converters
                     0x04, 01, 0, 0, 0, // second value |                     |
                 };
 
-            arrayOfArrayConverter.Write(new int[][] { new int[] { 23, 45, 67 }, new int[] { 89, 1 } }, messageWriter);
+            var arrayOfArray = new[] { new[] { 23, 45, 67 }, new[] { 89, 1 } };
+            arrayOfArrayConverter.Write(arrayOfArray, messageWriter);
 
             Assert.Equal(expectedResult, output.ToArray());
+
+            output.Position = 0;
+            object? result = arrayOfArrayConverter.Read(typeof(int[][]), messageReader);
+
+            Assert.IsType<int[][]>(result);
+            Assert.Equal(arrayOfArray, result);
 
             // reset memory stream without reallocating
             output.Position = 0;
             output.SetLength(0);
 
-            arrayOfListConverter.Write(new List<int>[] { new() { 23, 45, 67 }, new() { 89, 1 } }, messageWriter);
+            var arrayOfList = new List<int>[] { new() { 23, 45, 67 }, new() { 89, 1 } };
+            arrayOfListConverter.Write(arrayOfList, messageWriter);
 
             Assert.Equal(expectedResult, output.ToArray());
+
+            output.Position = 0;
+            result = arrayOfListConverter.Read(typeof(List<int>[]), messageReader);
+
+            Assert.IsType<List<int>[]>(result);
+            Assert.Equal(arrayOfList, result);
 
             // reset memory stream without reallocating
             output.Position = 0;
             output.SetLength(0);
 
-            listOfArrayConverter.Write(new List<int[]> { new int[] { 23, 45, 67 }, new int[] { 89, 1 } }, messageWriter);
+            var listOfArray = new List<int[]> { new[] { 23, 45, 67 }, new[] { 89, 1 } };
+            listOfArrayConverter.Write(listOfArray, messageWriter);
 
             Assert.Equal(expectedResult, output.ToArray());
+
+            output.Position = 0;
+            result = listOfArrayConverter.Read(typeof(List<int>[]), messageReader);
+
+            Assert.IsType<List<int[]>>(result);
+            Assert.Equal(listOfArray, result);
 
             // reset memory stream without reallocating
             output.Position = 0;
             output.SetLength(0);
 
-            listOfListConverter.Write(new List<List<int>> { new() { 23, 45, 67 }, new() { 89, 1 } }, messageWriter);
+            var listOfList = new List<List<int>> { new() { 23, 45, 67 }, new() { 89, 1 } };
+            listOfListConverter.Write(listOfList, messageWriter);
 
             Assert.Equal(expectedResult, output.ToArray());
+
+            output.Position = 0;
+            result = listOfListConverter.Read(typeof(List<int>[]), messageReader);
+
+            Assert.IsType<List<List<int>>>(result);
+            Assert.Equal(listOfList, result);
         }
 
         [Fact]
@@ -221,6 +279,7 @@ namespace Kuriba.Core.Serialization.Converters
         {
             MemoryStream output = new();
             MessageWriter messageWriter = new(new BinaryWriter(output));
+            MessageReader messageReader = new(new BinaryReader(output));
             ConverterFactory factory = new ConverterFactory();
             GenericConverter genericArrayConverter = new ArrayConverter();
             factory.AddConverter(genericArrayConverter);
@@ -228,7 +287,8 @@ namespace Kuriba.Core.Serialization.Converters
 
             Converter array2DConverter = genericArrayConverter.SpecializeFor(typeof(byte[,]), factory);
 
-            array2DConverter.Write(new byte[2, 4] { { 11, 22, 33, 44 }, { 15, 30, 45, 60 } }, messageWriter);
+            var array2D = new byte[,] { { 11, 22, 33, 44 }, { 15, 30, 45, 60 } };
+            array2DConverter.Write(array2D, messageWriter);
 
             Assert.Equal(
                 new byte[]
@@ -247,13 +307,23 @@ namespace Kuriba.Core.Serialization.Converters
                 output.ToArray()
             );
 
+            output.Position = 0;
+            object? result = array2DConverter.Read(typeof(byte[,]), messageReader);
+
+            Assert.IsType<byte[,]>(result);
+            var resultAs2DArray = (byte[,])result;
+            Assert.Equal(2, resultAs2DArray.GetLength(0));
+            Assert.Equal(4, resultAs2DArray.GetLength(1));
+            Assert.Equal(array2D, resultAs2DArray);
+
             // reset memory stream without reallocating
             output.Position = 0;
             output.SetLength(0);
 
             Converter array3DConverter = genericArrayConverter.SpecializeFor(typeof(byte[,,]), factory);
 
-            array3DConverter.Write(new byte[2, 2, 2] { { { 0, 1 }, { 2, 3 } }, { { 4, 5 }, { 6, 7 } } }, messageWriter);
+            var array3D = new byte[,,] { { { 0, 1 }, { 2, 3 } }, { { 4, 5 }, { 6, 7 } } };
+            array3DConverter.Write(array3D, messageWriter);
 
             Assert.Equal(
                 new byte[30]
@@ -268,21 +338,31 @@ namespace Kuriba.Core.Serialization.Converters
                     0x02, // third dimension
                     0x01, 0b000, 0x01, 0b001, // first data slice
                     0x80, // |
-                    0x02, // | repeated thrid dimension header
+                    0x02, // | repeated third dimension header
                     0x01, 0b010, 0x01, 0b011, // second data slice
 
                     0x80, // |
                     0x02, // | repeated second dimension header
 
                     0x80, // | 
-                    0x02, // | repeated thrid dimension header
+                    0x02, // | repeated third dimension header
                     0x01, 0b100, 0x01, 0b101, // third data slice
                     0x80, // |
-                    0x02, // | repeated thrid dimension header
+                    0x02, // | repeated third dimension header
                     0x01, 0b110, 0x01, 0b111, // fourth data slice
                 },
                 output.ToArray()
             );
+
+            output.Position = 0;
+            result = array3DConverter.Read(typeof(byte[,,]), messageReader);
+
+            Assert.IsType<byte[,,]>(result);
+            var resultAs3DArray = (byte[,,])result;
+            Assert.Equal(2, resultAs3DArray.GetLength(0));
+            Assert.Equal(2, resultAs3DArray.GetLength(1));
+            Assert.Equal(2, resultAs3DArray.GetLength(2));
+            Assert.Equal(array3D, resultAs3DArray);
         }
     }
 }

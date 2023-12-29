@@ -5,10 +5,10 @@ using System.IO;
 
 namespace Kuriba.Core.Serialization
 {
-    internal class MessageWriter : IMessageWriter
+    internal class MessageWriter : IMessageWriter, IReferenceTracker
     {
-        private BinaryWriter output;
-        private HashSet<object> visitedObjects;
+        private readonly BinaryWriter output;
+        private readonly HashSet<object> visitedObjects;
 
         public MessageWriter(BinaryWriter output)
         {
@@ -16,26 +16,25 @@ namespace Kuriba.Core.Serialization
             this.visitedObjects = new HashSet<object>();
         }
 
-        private void CheckObject(object obj)
+        public void TrackObject(object? obj)
         {
-            if (visitedObjects.Contains(obj))
+            if (obj != null && !visitedObjects.Add(obj))
             {
                 throw new CircularReferenceException(obj);
             }
-            visitedObjects.Add(obj);
         }
 
         public void WriteMessage(Type type, object? message)
         {
             if (message == null) return;
 
-            this.CheckObject(message);
+            this.TrackObject(message);
 
             MessageStructure structure = MessageFactory.Default.StructureForType(type);
 
             this.WriteHeader(structure.MessageId, structure.LastFieldId);
             
-            MessageStructureIterator iter = new MessageStructureIterator(structure);
+            using var iter = new MessageStructureIterator(structure);
             while (iter.NextField())
             {
                 if (iter.Padding > 0)
@@ -43,7 +42,7 @@ namespace Kuriba.Core.Serialization
                     this.WritePadding(iter.Padding);
                 }
 
-                iter.CurrentField.WriteValueFromMessage(message, this);
+                iter.CurrentField.WriteValueFromMessage(message, this, this);
             }
         }
 
@@ -61,7 +60,7 @@ namespace Kuriba.Core.Serialization
             }
         }
 
-        public void WritePadding(byte padding)
+        private void WritePadding(byte padding)
         {
             this.output.Write((byte)WireType.Padding);
             this.output.Write(padding);

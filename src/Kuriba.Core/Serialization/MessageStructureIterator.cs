@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Kuriba.Core.Serialization
 {
-    internal class MessageStructureIterator
+    internal class MessageStructureIterator : IDisposable
     {
-        private IEnumerator<KeyValuePair<byte, MessageField>> fields;
+        private readonly IEnumerator<KeyValuePair<byte, MessageField>> fields;
         private MessageField? currentField;
         private int padding;
         private int lastFieldId;
@@ -41,6 +41,11 @@ namespace Kuriba.Core.Serialization
             this.currentField = kvp.Value;
 
             return true;
+        }
+
+        public void Dispose()
+        {
+            fields.Dispose();
         }
     }
 }
